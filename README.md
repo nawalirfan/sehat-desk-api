@@ -155,9 +155,8 @@ The system prompt lives in `prompts/system-prompt.md`, plain text, no markdown h
 - **A dropped call mid-registration loses nothing but also saves nothing.** Only the final confirmed save writes to the database, so a dropped call before that point just means the caller tries again, no partial or garbage records.
 - **Mock appointments and mock providers.** `schedule_appointment` picks from a small hardcoded list of upcoming weekday slots and cycles through a fixed roster of provider names. There's no real clinic calendar behind it, this is intentionally simple demo scheduling, not a real booking system.
 - **Transcripts are stored raw.** No redaction of anything spoken during the call beyond truncating phone numbers in application logs.
-- **No automated tests.** Dropped from scope to protect time for the core conversation flow, the backend, and documentation. 
+- **No automated tests.** Dropped from scope to protect time for the core conversation flow, the backend, and documentation.
 
 ## Next steps
 
 - Automated tests for main backend logic.
-- A more complete call-transcript view in the dashboard, currently the data is captured and reachable via the API but has no UI.
