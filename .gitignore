@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# local SQLite database
+data/*
+!data/.gitkeep
+
+# logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# env files
+.env
+.env.local
+
+# editor/OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# coverage, if tests get added later
+coverage/
+
+# one-off manual-paste helpers, not the real prompt/tool source
+prompts/system-prompt.resolved-for-vapi-dashboard.md
+prompts/system-prompt.plaintext-for-vapi.txt
+prompts/tool-definitions-for-vapi.json
