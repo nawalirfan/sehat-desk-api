@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ZodError } from 'zod';
 import { PatientsService } from '../patients/patients.service';
 import { AppointmentsService } from '../appointments/appointments.service';
+import { CallPatientLinkService } from './call-patient-link.service';
 import { patientCreateSchema, patientUpdateSchema } from '../patients/patients.schema';
 
 export interface VapiToolCall {
@@ -25,13 +26,14 @@ export class ToolHandlersService {
   constructor(
     private readonly patientsService: PatientsService,
     private readonly appointmentsService: AppointmentsService,
+    private readonly callPatientLink: CallPatientLinkService,
   ) {}
 
-  async handle(toolCalls: VapiToolCall[]): Promise<ToolCallResult[]> {
-    return Promise.all(toolCalls.map((call) => this.handleOne(call)));
+  async handle(toolCalls: VapiToolCall[], callId?: string): Promise<ToolCallResult[]> {
+    return Promise.all(toolCalls.map((call) => this.handleOne(call, callId)));
   }
 
-  private async handleOne(call: VapiToolCall): Promise<ToolCallResult> {
+  private async handleOne(call: VapiToolCall, callId?: string): Promise<ToolCallResult> {
     this.logger.log(`vapi_tool_call name=${call.function.name}`);
 
     try {
@@ -39,7 +41,7 @@ export class ToolHandlersService {
         case 'lookup_patient_by_phone':
           return { toolCallId: call.id, result: this.lookupPatientByPhone(call.function.arguments) };
         case 'create_or_update_patient':
-          return { toolCallId: call.id, result: this.createOrUpdatePatient(call.function.arguments) };
+          return { toolCallId: call.id, result: this.createOrUpdatePatient(call.function.arguments, callId) };
         case 'schedule_appointment':
           return { toolCallId: call.id, result: this.scheduleAppointment(call.function.arguments) };
         default:
@@ -99,7 +101,7 @@ export class ToolHandlersService {
     };
   }
 
-  private createOrUpdatePatient(args: Record<string, unknown>) {
+  private createOrUpdatePatient(args: Record<string, unknown>, callId?: string) {
     const { patient_id, ...payload } = args as { patient_id?: string } & Record<string, unknown>;
 
     if (patient_id) {
@@ -108,6 +110,7 @@ export class ToolHandlersService {
         return { success: false, error: this.describeValidationError(result.error) };
       }
       const patient = this.patientsService.update(patient_id, result.data);
+      if (callId) this.callPatientLink.remember(callId, patient.patient_id);
       return { success: true, patient_id: patient.patient_id };
     }
 
@@ -116,6 +119,7 @@ export class ToolHandlersService {
       return { success: false, error: this.describeValidationError(result.error) };
     }
     const patient = this.patientsService.create(result.data);
+    if (callId) this.callPatientLink.remember(callId, patient.patient_id);
     return { success: true, patient_id: patient.patient_id };
   }
 

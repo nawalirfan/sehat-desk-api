@@ -6,6 +6,7 @@ import { EndOfCallHandlerService } from './end-of-call-handler.service';
 interface VapiToolCallRequest {
   message: {
     toolCallList: VapiToolCall[];
+    call?: { id?: string };
   };
 }
 
@@ -26,7 +27,7 @@ export class VapiController {
     @Headers() headers: Record<string, string>,
   ): Promise<{ results: ToolCallResult[] }> {
     this.verifySecret(headers);
-    const results = await this.toolHandlers.handle(body.message.toolCallList);
+    const results = await this.toolHandlers.handle(body.message.toolCallList, body.message.call?.id);
     return { results };
   }
 
