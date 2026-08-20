@@ -35,7 +35,7 @@ export class PatientsRepository {
     const params: string[] = [];
 
     if (query.last_name) {
-      conditions.push('last_name = ?');
+      conditions.push('last_name = ? COLLATE NOCASE');
       params.push(query.last_name);
     }
     if (query.date_of_birth) {
