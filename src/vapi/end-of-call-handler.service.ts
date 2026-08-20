@@ -40,11 +40,15 @@ export class EndOfCallHandlerService {
   private resolvePatientId(payload: VapiEndOfCallPayload): string | null {
     const rawNumber = payload.message.call?.customer?.number;
     if (!rawNumber) {
+      this.logger.warn('end_of_call_report has no customer number, cannot link transcript');
       return null;
     }
 
     const phoneNumber = rawNumber.replace(/\D/g, '').slice(-10);
     const patient = this.patientsService.findActiveByPhone(phoneNumber);
+    if (!patient) {
+      this.logger.warn(`end_of_call_report customer number did not match any patient raw=${rawNumber} normalized=${phoneNumber}`);
+    }
     return patient?.patient_id ?? null;
   }
 }
